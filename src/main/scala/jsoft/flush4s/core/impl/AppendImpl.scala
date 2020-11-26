@@ -7,7 +7,7 @@ import scala.util.{Failure, Success}
 
 final case class AppendImpl[A](item: A, src: Flush[A]) extends Flush[A] {
   override def call(subs: Subscriber[A]): Unit = {
-    implicit val ec = subs.executionContext
+    implicit val ec: ExecutionContext = subs.executionContext
     src.call(new Subscriber[A] {
       override def executionContext: ExecutionContext = ec
 

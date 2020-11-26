@@ -28,6 +28,8 @@ trait Flush[A] {
 
   final def foreach(f: A => Unit): Flush[Unit] = ForeachImpl(f, this)
 
+  final def switch[B >: A](cond: (A => Boolean, Flush[B])*): Flush[B] = SwitchImpl(this, cond: _*)
+
   final def recoverWith(f: Throwable => A): Flush[A] = RecoverWithImpl(f, this)
 
   final def runSync(implicit ec: ExecutionContext): Seq[A] = {

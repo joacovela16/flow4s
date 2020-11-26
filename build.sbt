@@ -1,13 +1,13 @@
 import Dependencies._
 
-ThisBuild / scalaVersion := "2.13.3"
-ThisBuild / version := "0.1.0-SNAPSHOT"
+ThisBuild / scalaVersion := "2.12.12"
+ThisBuild / version := "0.1.0"
 ThisBuild / organization := "jsoft.flush4s"
 ThisBuild / organizationName := "example"
 ThisBuild / scalacOptions := Seq("-language:implicitConversions")
 ThisBuild / licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html"))
 
-
+Global / onChangedBuildSource := ReloadOnSourceChanges
 bintrayReleaseOnPublish in ThisBuild := false
 
 lazy val disablingPublishingSettings = Seq(skip in publish := true, publishArtifact := false)
