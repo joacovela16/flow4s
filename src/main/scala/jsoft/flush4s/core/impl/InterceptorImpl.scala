@@ -1,11 +1,11 @@
 package jsoft.flush4s.core.impl
 
-import jsoft.flush4s.core.{Ack, Continue, Flush, Subscriber}
+import jsoft.flush4s.core.{Ack, Continue, Flow, Subscriber}
 
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 
-final case class InterceptorImpl[A, B](src: Flush[A], f: Flush[Seq[A]] => Flush[B]) extends Flush[B] {
+final case class InterceptorImpl[A, B](src: Flow[A], f: Seq[A] => Flow[B]) extends Flow[B] {
   override def call(subs: Subscriber[B]): Unit = {
     implicit val ec: ExecutionContext = subs.executionContext
 
@@ -20,9 +20,7 @@ final case class InterceptorImpl[A, B](src: Flush[A], f: Flush[Seq[A]] => Flush[
       }
 
       override def onComplete(): Unit = {
-        val flowSeqA: Flush[Seq[A]] = Flush.fromIterable(store.toSeq)
-
-        f(flowSeqA).call(new Subscriber[B] {
+        f(store).call(new Subscriber[B] {
           override def executionContext: ExecutionContext = ec
 
           override def onNext(next: B): Future[Ack] = subs.onNext(next)

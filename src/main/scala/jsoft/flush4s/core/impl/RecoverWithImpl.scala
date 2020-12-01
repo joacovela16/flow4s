@@ -1,10 +1,10 @@
 package jsoft.flush4s.core.impl
 
-import jsoft.flush4s.core.{Ack, Flush, Subscriber}
+import jsoft.flush4s.core.{Ack, Continue, Flow, Subscriber}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-final case class RecoverWithImpl[A](f: Throwable => A, src: Flush[A]) extends Flush[A] {
+final case class RecoverWithImpl[A](f: Throwable => A, src: Flow[A]) extends Flow[A] {
   override def call(subs: Subscriber[A]): Unit = {
     implicit val ec: ExecutionContext = subs.executionContext
 

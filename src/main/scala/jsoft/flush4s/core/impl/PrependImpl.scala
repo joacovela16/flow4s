@@ -1,13 +1,13 @@
 package jsoft.flush4s.core.impl
 
-import jsoft.flush4s.core._
+import jsoft.flush4s.core.{Ack, Continue, Flow, Stop, Subscriber}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-final case class PrependImpl[A](item: A, src: Flush[A]) extends Flush[A] {
+final case class PrependImpl[A](item: A, src: Flow[A]) extends Flow[A] {
   override def call(subs: Subscriber[A]): Unit = {
-    implicit val ec = subs.executionContext
+    implicit val ec: ExecutionContext = subs.executionContext
     subs.onNext(item).recoverWith { case t => subs.onError(t) }.onComplete {
       case Failure(exception) => subs.onAbort(exception)
       case Success(value) =>

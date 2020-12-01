@@ -1,10 +1,10 @@
 package jsoft.flush4s.core.impl
 
-import jsoft.flush4s.core.{Ack, Continue, Flush, Subscriber}
+import jsoft.flush4s.core.{Ack, Flow, Subscriber}
 
-import scala.concurrent.{ExecutionContext, Future, Promise}
+import scala.concurrent.{ExecutionContext, Future}
 
-final case class SwitchImpl[A, B >: A](src: Flush[A], cond: (A => Boolean, Flush[B])*) extends Flush[B] {
+final case class SwitchImpl[A, B](src: Flow[A], cond: Seq[(A => Boolean, A => Flow[B])]) extends Flow[B] {
 
   override def call(subs: Subscriber[B]): Unit = {
     implicit val ec: ExecutionContext = subs.executionContext
@@ -15,23 +15,8 @@ final case class SwitchImpl[A, B >: A](src: Flush[A], cond: (A => Boolean, Flush
       override def onNext(next: A): Future[Ack] = {
 
         cond.collectFirst { case (aToBoolean, resolver) if aToBoolean(next) => resolver } match {
-          case Some(resolver) =>
-
-            val promise: Promise[Ack] = Promise[Ack]()
-            resolver.call(new Subscriber[B] {
-              override def executionContext: ExecutionContext = ec
-
-              override def onNext(next2: B): Future[Ack] = subs.onNext(next2)
-
-              override def onComplete(): Unit = promise.success(Continue)
-
-              override def onError(t: Throwable): Future[Ack] = subs.onError(t)
-
-              override def onAbort(t: Throwable): Unit = subs.onAbort(t)
-            })
-
-            promise.future
-          case None => subs.onNext(next)
+          case Some(resolver) => Flow.syncMap(subs, resolver(next))
+          case None => Future.failed(new RuntimeException("Can't find condition"))
         }
       }
 

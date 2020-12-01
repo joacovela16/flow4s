@@ -1,10 +1,11 @@
 package jsoft.flush4s.core.impl
 
-import jsoft.flush4s.core._
+import jsoft.flush4s.core.{Ack, Continue, Flow, Subscriber}
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.language.higherKinds
 
-final case class MapIterableImpl[A, B, S[x] <: Iterable[x]](f: A => S[B], src: Flush[A]) extends Flush[B] {
+final case class MapIterableImpl[A, B, S[x] <: Iterable[x]](f: A => S[B], src: Flow[A]) extends Flow[B] {
 
   private def caller(subs: Subscriber[B], it: Iterator[B])(implicit ec: ExecutionContext): Future[Ack] = {
     if (it.hasNext) {
@@ -22,7 +23,9 @@ final case class MapIterableImpl[A, B, S[x] <: Iterable[x]](f: A => S[B], src: F
       override def executionContext: ExecutionContext = ec
 
       override def onNext(next: A): Future[Ack] = {
-        Future(f(next)).flatMap(xs => caller(subs, xs.iterator))
+        Future(f(next)).flatMap { xs =>
+          Flow.syncMap(subs, Flow.fromSeq(xs.toSeq))
+        }
       }
 
       override def onComplete(): Unit = subs.onComplete()

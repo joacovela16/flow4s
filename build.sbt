@@ -2,8 +2,8 @@ import Dependencies._
 
 ThisBuild / scalaVersion := "2.12.12"
 ThisBuild / version := "0.1.0"
-ThisBuild / organization := "jsoft.flush4s"
-ThisBuild / organizationName := "example"
+ThisBuild / organization := "jsoft.flow4s"
+ThisBuild / organizationName := "jsoft"
 ThisBuild / scalacOptions := Seq("-language:implicitConversions")
 ThisBuild / licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html"))
 
@@ -26,7 +26,7 @@ lazy val enablingPublishingSettings = Seq(
 
 lazy val root = (project in file("."))
   .settings(
-    name := "flush4s",
+    name := "flow4s",
     libraryDependencies += scalaTest % Test,
     enablingPublishingSettings
   )

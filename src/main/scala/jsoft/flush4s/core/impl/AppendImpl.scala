@@ -1,11 +1,11 @@
 package jsoft.flush4s.core.impl
 
-import jsoft.flush4s.core.{Ack, Continue, Flush, Subscriber}
+import jsoft.flush4s.core.{Ack, Continue, Flow, Subscriber}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-final case class AppendImpl[A](item: A, src: Flush[A]) extends Flush[A] {
+final case class AppendImpl[A](item: A, src: Flow[A]) extends Flow[A] {
   override def call(subs: Subscriber[A]): Unit = {
     implicit val ec: ExecutionContext = subs.executionContext
     src.call(new Subscriber[A] {

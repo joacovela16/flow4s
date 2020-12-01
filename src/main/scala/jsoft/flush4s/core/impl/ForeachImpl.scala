@@ -1,10 +1,10 @@
 package jsoft.flush4s.core.impl
 
-import jsoft.flush4s.core.{Ack, Flush, Subscriber}
+import jsoft.flush4s.core.{Ack, Continue, Flow, Subscriber}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-final case class ForeachImpl[A](f: A => Unit, src: Flush[A]) extends Flush[Unit] {
+final case class ForeachImpl[A](f: A => Unit, src: Flow[A]) extends Flow[Unit] {
   override def call(subs: Subscriber[Unit]): Unit = {
     implicit val ec: ExecutionContext = subs.executionContext
 

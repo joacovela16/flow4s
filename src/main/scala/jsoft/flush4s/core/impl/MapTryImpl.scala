@@ -1,21 +1,18 @@
 package jsoft.flush4s.core.impl
 
-import java.util.concurrent.atomic.AtomicLong
-
 import jsoft.flush4s.core.{Ack, Flow, Subscriber}
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
-final case class ZipWithIndex[A](src: Flow[A]) extends Flow[(Long, A)] {
-
-  override def call(subs: Subscriber[(Long, A)]): Unit = {
+final case class MapTryImpl[A, B](src: Flow[A], f: A => Try[B]) extends Flow[B] {
+  override def call(subs: Subscriber[B]): Unit = {
     implicit val ec: ExecutionContext = subs.executionContext
-    src.call(new Subscriber[A] {
-      val counter = new AtomicLong(0)
 
+    src.call(new Subscriber[A] {
       override def executionContext: ExecutionContext = ec
 
-      override def onNext(next: A): Future[Ack] = Future((counter.getAndIncrement(), next)).flatMap(subs.onNext)
+      override def onNext(next: A): Future[Ack] = Future.fromTry(f(next)).flatMap(subs.onNext)
 
       override def onComplete(): Unit = subs.onComplete()
 
